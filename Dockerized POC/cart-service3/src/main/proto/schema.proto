@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package com.leo.microservice.cartservice.proto;
+
+option java_multiple_files = true;
+option java_package = "com.leo.microservice.cartservice.proto";
+
+
+message CartsRequest{
+}
+
+message CartRequest{
+	int64 cartId = 1;
+	int64 productId = 2;
+	int32 quantity = 3;
+}
+
+message CartsResponse{
+	repeated CartResponse carts = 1;
+}
+
+message CartResponse{
+	int64 cartId = 1;
+	double cartTotalPrice = 2;
+	repeated CartItemResponse cartItems = 3;
+}
+
+message CartItemResponse{
+	int64 cartItemId = 1;
+	int32 quantity = 2;
+	int64 productId = 3;
+	int64 cartId = 4;
+	double productPrice = 5;
+	double cartItemTotalPrice = 6;
+}
+
+
+
+service CartService {
+	rpc getCarts(CartsRequest) returns (CartsResponse){}
+
+	rpc createCart(CartRequest) returns (CartResponse){}
+
+	rpc getCartById(CartRequest) returns (CartResponse){}
+
+	rpc addItemToCart(CartRequest) returns (CartResponse){}
+
+	rpc deleteFromCart(CartRequest) returns (CartResponse){}
+}
+

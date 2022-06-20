@@ -1,0 +1,116 @@
+package com.leo.microservice.productservice.serviceimpl;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.leo.microservice.productservice.dto.ProductDto;
+import com.leo.microservice.productservice.dto.ProductsDto;
+import com.leo.microservice.productservice.entity.Product;
+import com.leo.microservice.productservice.exception.ProductDuplicateNameException;
+import com.leo.microservice.productservice.repository.ProductHibernateRepository;
+//import com.leo.microservice.productservice.repository.ProductRepository;
+import com.leo.microservice.productservice.service.ProductService;
+import com.leo.microservice.productservice.util.ProductConverter;
+import com.leo.microservice.productservice.util.ProductUtilities;
+
+@Service
+public class ProductServiceImpl implements ProductService {
+
+//	@Autowired
+//	ProductRepository productRepository;
+
+	@Autowired
+	ProductConverter productConverter;
+	
+	
+	@Autowired
+	ProductHibernateRepository productHib;
+
+	@Override
+	public List<Product> getAllProducts() {
+		return productHib.getProducts();
+		
+	}
+
+	@Override
+	public ProductsDto getAllProductsDto() {
+		ProductsDto products = ProductsDto.builder().products(getAllProducts().stream().map(this::convertProductEntityToProductDto).collect(Collectors.toList())).build();
+		return products;
+	}
+
+	@Override
+	public ProductDto addProduct(ProductDto productdto) {
+		
+		productdto.setProductId(null);
+		checkForDuplicateName(productdto);
+		Product product = convertProductDtoToProductEntity(productdto);
+		product.setDateCreated(ProductUtilities.getDateAndTime());
+//		productRepository.save(product);
+		return convertProductEntityToProductDto(productHib.saveProduct(product));
+//		return convertProductEntityToProductDto(productRepository.save(product));
+	}
+
+	private Product convertProductDtoToProductEntity(ProductDto productdto) {
+		return productConverter.dtoToEntity(productdto);
+	}
+
+	private ProductDto convertProductEntityToProductDto(Product product) {
+		return productConverter.entityToDto(product);
+	}
+
+	@Override
+	public Product findProductById(Long productId) {
+//		Optional<Product> prod = productRepository.findById(productId);
+//		if (prod.isPresent()) {
+//			return prod.get();
+//		}
+		return productHib.findProductById(productId);
+	}
+
+	@Override
+	public ProductDto updateProduct(Long id, ProductDto productdto) {	
+		if (findProductById(id) != null) {
+			
+			checkForDuplicateName(productdto);
+			
+			Product product = findProductById(id);
+			if (!"".equals(productdto.getProductName())) product.setProductName(productdto.getProductName());
+			if (!"".equals(productdto.getProductDescription())) product.setProductDescription(productdto.getProductDescription());
+			if (productdto.getPrice() != 0) product.setPrice(productdto.getPrice());
+			product.setDateCreated(ProductUtilities.getDateAndTime());
+			updateProductDetails(product);
+			
+			productdto.setProductId(id);
+			return productdto;
+		}
+		return null;
+	}
+
+	private void updateProductDetails(Product product) {
+//		productRepository.save(product);
+		productHib.updateProduct(product);
+	}
+
+	@Override
+	public ProductDto getProduct(Long id) {
+		Product product = findProductById(id);
+		if (product != null) {
+			return convertProductEntityToProductDto(product);
+		}
+		return null;
+	}
+
+	private void checkForDuplicateName(ProductDto productdto) {
+		Product product = productHib.findProductByName(productdto.getProductName());
+//		product = productRepository.findByProductName(productdto.getProductName());
+//		
+		if (product != null && productdto.getProductName().equals(product.getProductName())) {
+			throw new ProductDuplicateNameException("Product Name Already Exists. Duplicate product not allowed");
+		}
+	}
+
+}

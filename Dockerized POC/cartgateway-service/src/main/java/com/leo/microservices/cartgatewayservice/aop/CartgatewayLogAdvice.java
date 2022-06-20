@@ -1,0 +1,97 @@
+package com.leo.microservices.cartgatewayservice.aop;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@Component
+@Aspect
+public class CartgatewayLogAdvice {
+	
+	private Logger logger = LoggerFactory.getLogger(CartgatewayLogAdvice.class);
+	
+	@Pointcut(value = "execution (* com.leo.microservices.cartgatewayservice.controller.*.*(..) )")
+	public void cartgatewayControllerPointCut() {
+		//point cut for product controller
+	}
+
+	@Around("cartgatewayControllerPointCut()")
+	public Object myCartgatewayLogger(ProceedingJoinPoint pcj) throws Throwable {
+
+		ObjectMapper mapper = new ObjectMapper();
+		String methodName = pcj.getSignature().getName();
+		String className = pcj.getTarget().getClass().getSimpleName();
+		
+		//SENDING LOG - Class and method called + arguments sent
+		String argString = mapper.writeValueAsString(pcj.getArgs());
+		logger.info("From class: {}", className);
+		logger.info("Invoked method: {}", methodName);
+		logger.info("Argumenst passed: {}" , argString);
+		Object obj = pcj.proceed();
+		
+		//SENDING LOG - whole response entity
+		String valueString = mapper.writeValueAsString(obj);
+		logger.info("Resulting Reponse: {} ", valueString);
+		
+		return obj;
+	}
+	
+	@Pointcut(value = "execution (* com.leo.microservices.cartgatewayservice.service.*.*(..) )")
+	public void cartgatewayServicePointCut() {
+		//point cut for product service
+	}
+
+	@Around("cartgatewayServicePointCut()")
+	public Object myCartgatewayServiceLogger(ProceedingJoinPoint pcj) throws Throwable {
+
+		ObjectMapper mapper = new ObjectMapper();
+		String methodName = pcj.getSignature().getName();
+		String className = pcj.getTarget().getClass().getSimpleName();
+		
+		//SENDING LOG - Class and method called + arguments sent
+		String argString = mapper.writeValueAsString(pcj.getArgs());
+		logger.info("From class: {}", className);
+		logger.info("Invoked method: {}", methodName);
+		logger.info("Argumenst passed: {}" , argString);
+		Object obj = pcj.proceed();
+		
+		//SENDING LOG - whole response entity
+		String valueString = mapper.writeValueAsString(obj);
+		logger.info("Resulting Reponse: {} ", valueString);
+		
+		return obj;
+	}
+	
+	@Pointcut(value = "execution (* com.leo.microservices.cartgatewayservice.exception.*.*(..) )")
+	public void cartgatewayExceptionPointCut() {
+		//point cut for product controller
+	}
+
+	@Around("cartgatewayExceptionPointCut()")
+	public Object myCartGatewayExceptionLogger(ProceedingJoinPoint pcj) throws Throwable {
+
+		ObjectMapper mapper = new ObjectMapper();
+		String methodName = pcj.getSignature().getName();
+		String className = pcj.getTarget().getClass().getSimpleName();
+		
+		//SENDING LOG - Class and method called + arguments sent
+//		String argString = mapper.writeValueAsString(pcj.getArgs());
+		logger.info("From class: {}", className);
+		logger.info("Invoked method: {}", methodName);
+//		logger.info("Argumenst passed: {}" , argString);
+		logger.info("An exception was thrown");
+		Object obj = pcj.proceed();
+		
+		//SENDING LOG - whole response entity
+//		String valueString = mapper.writeValueAsString(obj);
+//		logger.info("Resulting Reponse: {} ", valueString);
+		
+		return obj;
+	}
+}

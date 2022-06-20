@@ -1,0 +1,40 @@
+version: "3"
+
+networks:
+  app-network:
+  
+    
+services: 
+ product-microservice:
+  container_name: product-app
+  image: product-microservice
+  build: .
+  ports: 
+   - 8091:8091
+  environment:
+   MYSQL_HOST: mysqldb
+   MYSQL_USER: root
+   MYSQL_PASSWORD: root
+   MYSQL_PORT: 3306
+   SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/productdb
+   SPRING_DATASOURCE_USERNAME: root
+   SPRING_DATASOURCE_PASSWORD: password
+   SPRING_DATASOURCE_DRIVER-CLASS-NAME: com.mysql.cj.jdbc.Driver
+  depends_on:
+   - mysqldb
+  restart: always
+  networks:
+   - app-network
+
+   
+ mysqldb:
+  container_name: mysqldb
+  image: mysql
+  ports:
+   - '3307:3306'
+  environment:
+   MYSQL_DATABASE: productdb
+   MYSQL_ROOT_PASSWORD: root
+  networks:
+   - app-network
+ 
