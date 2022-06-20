@@ -1,0 +1,240 @@
+package com.leo.microservice.cartservice.service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.client.RestTemplate;
+
+import com.leo.microservice.cartservice.dto.ProductDto;
+import com.leo.microservice.cartservice.entity.Cart;
+import com.leo.microservice.cartservice.entity.CartItem;
+import com.leo.microservice.cartservice.exception.InvalidCartException;
+import com.leo.microservice.cartservice.exception.InvalidCartItemException;
+import com.leo.microservice.cartservice.exception.InvalidProductException;
+import com.leo.microservice.cartservice.mapper.CartItemMapper;
+import com.leo.microservice.cartservice.mapper.CartMapper;
+import com.leo.microservice.cartservice.util.CartConverter;
+import com.leo.microservice.cartservice.util.CartUtilities;
+import com.leo.microservices.cartgatewayservice.protobuf.CartItemResponse;
+import com.leo.microservices.cartgatewayservice.protobuf.CartRequest;
+import com.leo.microservices.cartgatewayservice.protobuf.CartResponse;
+import com.leo.microservices.cartgatewayservice.protobuf.CartServiceGrpc.CartServiceImplBase;
+import com.leo.microservices.cartgatewayservice.protobuf.CartsRequest;
+import com.leo.microservices.cartgatewayservice.protobuf.CartsResponse;
+
+import io.grpc.stub.StreamObserver;
+import net.devh.boot.grpc.server.service.GrpcService;
+
+@GrpcService
+public class GrpcCartService extends CartServiceImplBase {
+
+	@Autowired
+	CartService cartService;
+
+	@Autowired
+	CartMapper cartMapper;
+
+	@Autowired
+	CartItemMapper cartItemMapper;
+
+	@Autowired
+	CartConverter cartConverter;
+
+	@Autowired
+	RestTemplate restTemplate;
+
+	@Override
+	public void getCarts(CartsRequest request, StreamObserver<CartsResponse> responseObserver) {
+		
+		CartsResponse carts = CartsResponse.newBuilder()
+				.addAllCarts(getAllCarts().stream().map(this::convertCartToGrpcCart).collect(Collectors.toList())).build();
+		
+		responseObserver.onNext(carts);
+		responseObserver.onCompleted();
+	}
+
+	@Override
+	public void createCart(CartRequest request, StreamObserver<CartResponse> responseObserver) {
+		Cart cart = new Cart();
+		cart.setDateCreated(CartUtilities.getDateAndTime());
+		cartMapper.insert(cart);
+		
+		CartResponse cartResponse = CartResponse.newBuilder().setCartId(cart.getCartId()).build();
+		
+		responseObserver.onNext(cartResponse);
+		responseObserver.onCompleted();
+	}
+
+	@Override
+	public void getCartById(CartRequest request, StreamObserver<CartResponse> responseObserver) {
+		Cart cart = getCart(request.getCartId());
+		
+		CartResponse cartResponse = CartResponse.newBuilder().setCartId(cart.getCartId())
+				.addAllCartItems(
+						getAllCartItems(cart.getCartId()).stream().map(this::convertCartItemToGrpcCartItem).collect(Collectors.toList()))
+				.setCartTotalPrice(cart.getTotalPrice()).build();
+
+		responseObserver.onNext(cartResponse);
+		responseObserver.onCompleted();
+	}
+
+	@Override
+	public void addItemToCart(CartRequest request, StreamObserver<CartResponse> responseObserver) {
+		CartItem cartItem = createCartItem(request);
+		addToCart(cartItem);
+		double total = updateCartTotalPrice(cartItem.getCartId());
+
+		CartResponse cartResponse = CartResponse.newBuilder().setCartId(cartItem.getCartId()).setCartTotalPrice(total)
+				.addAllCartItems(getAllCartItems(cartItem.getCartId()).stream().map(this::convertCartItemToGrpcCartItem)
+						.collect(Collectors.toList()))
+				.build();
+
+		responseObserver.onNext(cartResponse);
+		responseObserver.onCompleted();
+	}
+
+	@Override
+	public void deleteFromCart(CartRequest request, StreamObserver<CartResponse> responseObserver) {
+		CartItem cartItem = createCartItem(request);
+		deleteCartItem(cartItem);
+		double total = updateCartTotalPrice(cartItem.getCartId());
+
+		CartResponse cartResponse = CartResponse.newBuilder().setCartId(cartItem.getCartId()).setCartTotalPrice(total)
+				.addAllCartItems(getAllCartItems(cartItem.getCartId()).stream().map(this::convertCartItemToGrpcCartItem)
+						.collect(Collectors.toList()))
+				.build();
+		responseObserver.onNext(cartResponse);
+		responseObserver.onCompleted();
+	}
+
+	private Cart getCart(Long cartId) {
+
+		Cart cart = checkIfCartExists(cartId);
+		cart.setCartitems(getAllCartItems(cartId));
+		return cart;
+	}
+
+	private List<Cart> getAllCarts() {
+
+		List<Cart> carts = cartMapper.findAll();
+		for (Cart cart : carts) {
+			cart.setCartitems(getAllCartItems(cart.getCartId()));
+		}
+		return carts;
+	}
+
+	private CartItem createCartItem(CartRequest cartRequest) {
+		
+		Long cartId = cartRequest.getCartId();
+		Long productId = cartRequest.getProductId();
+		int quantity = cartRequest.getQuantity();
+
+		checkIfCartExists(cartId);
+		ProductDto productDto = checkIfProductExists(productId);
+
+		CartItem cartItem = new CartItem();
+		cartItem.setCartId(cartId);
+		cartItem.setProductId(productDto.getProductId());
+		cartItem.setProductPrice(productDto.getPrice());
+		cartItem.setQuantity(quantity);
+		cartItem.setCartItemTotalPrice(cartItem.getProductPrice() * cartItem.getQuantity());
+
+		return cartItem;
+	}
+
+	private void addToCart(CartItem cartItem) {
+
+		CartItem existingCartItem = findCartItem(cartItem.getCartId(), cartItem.getProductId());
+		if (existingCartItem != null) {
+			cartItem.setCartItemId(existingCartItem.getCartItemId());
+			updateProductFromCartItem(cartItem);
+		} else {
+			cartItem.setDateCreated(CartUtilities.getDateAndTime());
+			addProductToCart(cartItem);
+		}
+	}
+	
+	private void deleteCartItem(CartItem cartItem) {
+		
+		CartItem existingCartItem = findCartItem(cartItem.getCartId(), cartItem.getProductId());
+		if (existingCartItem == null) {
+			throw new InvalidCartItemException("Cart Item Does Not Exist");
+		} else {
+			deleteCartItemFromCart(existingCartItem);
+		}
+	}
+
+	private CartItem findCartItem(Long cartId, Long productId) {
+		
+		List<CartItem> cartItems = getAllCartItems(cartId);
+		for (CartItem item : cartItems) {
+			if (item.getProductId().equals(productId)) {
+				return item;
+			}
+		}
+		return null;
+	}
+
+	private Cart checkIfCartExists(Long cartId) {
+		
+		Cart cart = cartMapper.findById(cartId);
+		if (cart == null) {
+			throw new InvalidCartException("Cart Does Not Exist");
+		}
+		return cart;
+	}
+
+	private double updateCartTotalPrice(Long cartId) {
+
+		Cart cart = getCart(cartId);
+		List<CartItem> cartItems = getAllCartItems(cartId);
+		double total = 0;
+
+		for (CartItem cartItem : cartItems) {
+			total += cartItem.getCartItemTotalPrice();
+		}
+		cart.setTotalPrice(total);
+		cartMapper.updateCartTotal(cart);
+		return total;
+	}
+
+	private ProductDto checkIfProductExists(Long productId) {
+
+		//not inside docker
+		//ProductDto productDto = restTemplate.getForObject("http://localhost:8091/product/" + productId,
+		
+		//inside docker
+		ProductDto productDto = restTemplate.getForObject("http://product-service:8091/product/" + productId,
+				ProductDto.class);
+		if (productDto == null) {
+			throw new InvalidProductException("Product does not exist");
+		}
+		return productDto;
+	}
+
+	private List<CartItem> getAllCartItems(Long cartId) {
+		return cartItemMapper.findCartItemsById(cartId);
+	}
+
+	private void updateProductFromCartItem(CartItem cartItem) {
+		cartItemMapper.updateCartItem(cartItem);
+	}
+
+	private void addProductToCart(CartItem cartItem) {
+		cartItemMapper.insert(cartItem);
+	}
+
+	private void deleteCartItemFromCart(CartItem cartItem) {
+		cartItemMapper.deleteCartItem(cartItem);
+	}
+
+	private CartResponse convertCartToGrpcCart(Cart cart) {
+		return cartConverter.entityToGrpcCart(cart);
+	}
+
+	private CartItemResponse convertCartItemToGrpcCartItem(CartItem cartItem) {
+		return cartConverter.entityToGrpcCartItem(cartItem);
+	}
+
+}

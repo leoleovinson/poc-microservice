@@ -1,0 +1,112 @@
+_format_version: "1.1"
+consumers:
+- acls:
+  - group: admin-group
+  basicauth_credentials:
+  - password: ae1b1a4ee0c74fd22f1c20811742850cf1948193
+    username: admin
+  custom_id: admin
+  username: admin
+- acls:
+  - group: admin-group
+  basicauth_credentials:
+  - password: 7fc1d9160a106e1631d4db53d8af5218a9917be5
+    username: user
+  custom_id: user
+  username: user
+plugins:
+- config:
+    allow:
+    - admin-group
+    deny: null
+    hide_groups_header: false
+  enabled: true
+  name: acl
+  protocols:
+  - grpc
+  - grpcs
+  - http
+  - https
+  route: cart
+  service: Cart
+- config:
+    allow:
+    - admin-group
+    deny: []
+    hide_groups_header: false
+  enabled: true
+  name: acl
+  protocols:
+  - grpc
+  - grpcs
+  - http
+  - https
+  route: product
+  service: Products
+- config:
+    anonymous: null
+    hide_credentials: false
+  enabled: true
+  name: basic-auth
+  protocols:
+  - grpc
+  - grpcs
+  - http
+  - https
+services:
+- connect_timeout: 60000
+  host: cartgateway-app
+  name: Cart
+  path: /carts/
+  port: 8094
+  protocol: http
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    name: cart
+    path_handling: v0
+    paths:
+    - /cart/
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+  write_timeout: 60000
+- connect_timeout: 60000
+  host: product-app
+  name: Products
+  path: /product
+  port: 8091
+  protocol: http
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    name: product
+    path_handling: v0
+    paths:
+    - /product/
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+  write_timeout: 60000

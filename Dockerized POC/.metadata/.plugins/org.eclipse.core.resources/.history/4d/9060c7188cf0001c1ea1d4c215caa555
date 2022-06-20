@@ -1,0 +1,102 @@
+package com.leo.microservices.cartgatewayservice.service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import com.leo.microservices.cartgatewayservice.dto.CartDto;
+import com.leo.microservices.cartgatewayservice.dto.CartItemDto;
+import com.leo.microservices.cartgatewayservice.dto.ProductDto;
+import com.leo.microservices.cartgatewayservice.exception.CartgatewayAPIException;
+import com.leo.microservices.cartgatewayservice.exception.InvalidCartItemException;
+import com.leo.microservices.cartgatewayservice.protobuf.CartRequest;
+import com.leo.microservices.cartgatewayservice.protobuf.CartResponse;
+import com.leo.microservices.cartgatewayservice.protobuf.CartServiceGrpc;
+import com.leo.microservices.cartgatewayservice.protobuf.CartsRequest;
+import com.leo.microservices.cartgatewayservice.protobuf.CartsResponse;
+import com.leo.microservices.cartgatewayservice.utilities.CartConverter;
+
+import net.devh.boot.grpc.client.inject.GrpcClient;
+
+@Service
+public class CartGatewayService{
+	
+	@GrpcClient("grpc-cart-service")
+	CartServiceGrpc.CartServiceBlockingStub grpcClient;
+	
+	@Autowired
+	CartConverter cartConverter;
+	
+	@Autowired
+	RestTemplate restTemplate;
+	
+	public List<CartDto> getCarts(){
+		CartsRequest cartRequest = CartsRequest.newBuilder().build();
+		CartsResponse cartResponse =  grpcClient.getCarts(cartRequest);
+		return cartResponse.getCartsList().stream().map(cart->cartConverter.grpcCartToCartDto(cart)).collect(Collectors.toList());
+	}
+//	ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 9099).usePlaintext().build();
+//	CartServiceGrpc.CartServiceBlockingStub stub = CartServiceGrpc.newBlockingStub(channel);
+//	CartsResponse cartResponse =  stub.getCarts(cartRequest);
+	
+	
+	public CartDto createCart() {
+		System.out.println("inside create cart before");
+		CartRequest cartRequest = CartRequest.newBuilder().build();
+		CartResponse cartResponse = grpcClient.createCart(cartRequest);
+		System.out.println("inside create cart after");
+		return cartConverter.grpcCartToCartDto(cartResponse);	
+	}
+	
+
+	public CartDto getCartById(Long cartId) {
+		CartRequest cartRequest = CartRequest.newBuilder().setCartId(cartId).build();
+		CartResponse cartResponse = grpcClient.getCartById(cartRequest);
+		return cartConverter.grpcCartToCartDto(cartResponse);
+	}
+
+	public CartDto addToCart(Long cartId, Long productId, CartItemDto cartItemDto) {
+		validateCartItem(cartItemDto);
+		ProductDto productDto = checkIfProductExists(productId);
+		CartRequest cartRequest = CartRequest.newBuilder()
+				.setCartId(cartId)
+				.setProductId(productDto.getProductId())
+				.setQuantity(cartItemDto.getQuantity())
+				.build();
+		CartResponse cartResponse = grpcClient.addItemToCart(cartRequest);
+		return cartConverter.grpcCartToCartDto(cartResponse);
+	}
+
+	public CartDto deleteFromCart(Long cartId, Long productId) {
+		ProductDto productDto = checkIfProductExists(productId);
+		CartRequest cartRequest = CartRequest.newBuilder()
+				.setCartId(cartId)
+				.setProductId(productDto.getProductId())
+				.build();
+		CartResponse cartResponse = grpcClient.deleteFromCart(cartRequest);
+		return cartConverter.grpcCartToCartDto(cartResponse);
+	}
+	
+	private ProductDto checkIfProductExists(Long productId) {
+		
+		//not inside docker
+		//ProductDto productDto = restTemplate.getForObject("http://localhost:8091/product/" +productId, ProductDto.class);
+		
+		//inside docker
+		ProductDto productDto = restTemplate.getForObject("http://product-service:8091/product/" +productId, ProductDto.class);
+		if (productDto == null) {
+			throw new CartgatewayAPIException("Product Unavailable");
+		}
+		return productDto;
+	}
+	
+	private void validateCartItem(CartItemDto cartItemDto) {
+		if(cartItemDto.getQuantity()<1) {
+			throw new InvalidCartItemException("Quantity cannot be less than 1");
+		}
+	}
+
+}
