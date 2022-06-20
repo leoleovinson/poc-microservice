@@ -1,0 +1,9 @@
+
+l	java:S125"<This block of commented-out lines of code should be removed.(¨Ü•İøÿÿÿÿHÌ!RMAJORZ
+CODE_SMELL
+z
+java:S1128"IRemove this unused import 'com.leo.microservice.cartservice.entity.Cart'.(‘ñõĞüÿÿÿÿHÒ!RMINORZ
+CODE_SMELL
+~
+java:S1128	"MRemove this unused import 'com.leo.microservice.cartservice.entity.CartItem'.(àöÛûøÿÿÿÿHÔ!RMINORZ
+CODE_SMELL

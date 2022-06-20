@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="com.leo.microservices.cartgatewayservice.protobuf.CartServiceGrpc.CartServiceImplBase"/>
+    <fullyQualifiedTypeName name="com.leo.microservices.cartgatewayservice.protobuf.CartsRequest"/>
+    <fullyQualifiedTypeName name="com.leo.microservices.cartgatewayservice.protobuf.CartsResponse"/>
+    <fullyQualifiedTypeName name="com.leo.microservices.cartgatewayservice.protobuf.CartRequest"/>
+    <fullyQualifiedTypeName name="com.leo.microservices.cartgatewayservice.protobuf.CartItemResponse"/>
+    <fullyQualifiedTypeName name="com.leo.microservices.cartgatewayservice.protobuf.CartResponse"/>
+    <fullyQualifiedTypeName name="com.leo.microservice.cartservice.service.CartService"/>
+    <fullyQualifiedTypeName name="com.leo.microservice.cartservice.mapper.CartMapper"/>
+    <fullyQualifiedTypeName name="com.leo.microservice.cartservice.entity.Cart"/>
+    <fullyQualifiedTypeName name="lombok.NoArgsConstructor"/>
+    <fullyQualifiedTypeName name="java.util.List"/>
+    <fullyQualifiedTypeName name="lombok.Data"/>
+    <fullyQualifiedTypeName name="lombok.AllArgsConstructor"/>
+    <fullyQualifiedTypeName name="com.leo.microservice.productservice.dto.ProductDto"/>
+    <fullyQualifiedTypeName name="com.leo.microservice.productservice.dto.ProductsDto"/>
+    <fullyQualifiedTypeName name="lombok.Builder"/>
+    <fullyQualifiedTypeName name="java.util.stream.Collectors"/>
+</qualifiedTypeNameHistroy>

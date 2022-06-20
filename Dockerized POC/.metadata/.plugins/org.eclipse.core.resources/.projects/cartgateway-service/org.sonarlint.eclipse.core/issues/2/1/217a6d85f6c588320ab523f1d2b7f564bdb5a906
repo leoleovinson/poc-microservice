@@ -1,0 +1,25 @@
+
+k
+java:S1854O":Remove this useless assignment to local variable "mapper".(ĞÏáúÿÿÿÿH"RMAJORZ
+CODE_SMELL
+g	java:S125W"<This block of commented-out lines of code should be removed.(ÑäÇõH"RMAJORZ
+CODE_SMELL
+Œ
+java:S1488Y"[Immediately return this expression instead of assigning it to the temporary variable "obj".(‘éÉøÿÿÿÿHˆ"RMINORZ
+CODE_SMELL
+g	java:S125T"<This block of commented-out lines of code should be removed.(ÑˆêÊH‹"RMAJORZ
+CODE_SMELL
+\
+java:S1481O"+Remove this unused "mapper" local variable.(ĞÏáúÿÿÿÿHŒ"RMINORZ
+CODE_SMELL
+l	java:S125\"<This block of commented-out lines of code should be removed.(è˜«¾ùÿÿÿÿH"RMAJORZ
+CODE_SMELL
+–
+java:S41443"cUpdate this method so that its implementation is not identical to "myCartgatewayLogger" on line 25.(š¿Œ¡8ÅìíÕ–0HÃ$RMAJORZ
+CODE_SMELL
+…
+java:S1192!"ODefine a constant instead of duplicating this literal "From class: {}" 3 times.(ó€ê8ÅìíÕ–0HÅ$RCRITICALZ
+CODE_SMELL
+
+java:S1192""SDefine a constant instead of duplicating this literal "Invoked method: {}" 3 times.(¹©Ãÿÿÿÿÿ8ÅìíÕ–0HÉ$RCRITICALZ
+CODE_SMELL

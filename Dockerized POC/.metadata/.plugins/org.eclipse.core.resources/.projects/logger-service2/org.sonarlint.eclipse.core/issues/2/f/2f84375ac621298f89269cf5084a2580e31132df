@@ -1,0 +1,7 @@
+
+t
+java:S1128"CRemove this unused import 'org.springframework.data.annotation.Id'.(áŠ¿¸ýÿÿÿÿHÓRMINORZ
+CODE_SMELL
+„
+java:S1128"SRemove this unused import 'org.springframework.data.mongodb.core.mapping.Document'.(ú™ïÊúÿÿÿÿHÕRMINORZ
+CODE_SMELL

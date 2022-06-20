@@ -1,0 +1,68 @@
+package com.leo.microservice.cartservice.util;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Component;
+
+import com.leo.microservice.cartservice.dto.CartDto;
+import com.leo.microservice.cartservice.dto.CartItemDto;
+import com.leo.microservice.cartservice.entity.Cart;
+import com.leo.microservice.cartservice.entity.CartItem;
+import com.leo.microservices.cartgatewayservice.protobuf.CartItemResponse;
+import com.leo.microservices.cartgatewayservice.protobuf.CartResponse;
+
+
+@Component
+public class CartConverter {
+	
+	public CartDto entityToDto(Cart cart) {
+		ModelMapper mapper = new ModelMapper();
+		return mapper.map(cart, CartDto.class);
+	}
+	
+	public Cart dtoToEntity(CartDto cartDto) {
+		ModelMapper mapper = new ModelMapper();
+		return mapper.map(cartDto, Cart.class);
+	}
+	
+	public CartItemDto entityToDtoCartItem(CartItem cartItem) {
+		ModelMapper mapper = new ModelMapper();
+		return mapper.map(cartItem, CartItemDto.class);
+	}
+	
+	public CartItem dtoToEntityCartItem(CartItemDto cartItemDto) {
+		ModelMapper mapper = new ModelMapper();
+		return mapper.map(cartItemDto, CartItem.class);
+	}
+	
+	
+	public CartResponse entityToGrpcCart(Cart cart) {
+		
+		List<CartItemResponse> cartItems = new ArrayList<>();
+		cartItems.addAll(cart.getCartitems().stream().map(this::entityToGrpcCartItem).toList());
+		
+		CartResponse cartResponse = CartResponse.newBuilder()
+				.setCartId(cart.getCartId())
+				.setCartTotalPrice(cart.getTotalPrice())
+				.addAllCartItems(cartItems)
+				.build();
+		
+		return cartResponse;
+	}
+
+	public CartItemResponse entityToGrpcCartItem(CartItem cartItem) {
+		CartItemResponse cartItemResponse = CartItemResponse.newBuilder()
+				.setCartItemId(cartItem.getCartItemId())
+				.setQuantity(cartItem.getQuantity())
+				.setProductId(cartItem.getProductId())
+				.setCartId(cartItem.getCartId())
+				.setProductPrice(cartItem.getProductPrice())
+				.setCartItemTotalPrice(cartItem.getCartItemTotalPrice())
+				.build();
+		return cartItemResponse;
+	}
+	
+
+}

@@ -1,0 +1,21 @@
+
+f	java:S125"<This block of commented-out lines of code should be removed.(€š‚&H³#RMAJORZ
+CODE_SMELL
+g	java:S1256"<This block of commented-out lines of code should be removed.(øìÀ¢H®#RMAJORZ
+CODE_SMELL
+f	java:S125"<This block of commented-out lines of code should be removed.(é¢²	H¸#RMAJORZ
+CODE_SMELL
+g	java:S125^"<This block of commented-out lines of code should be removed.(½ÿ¹åH¹#RMAJORZ
+CODE_SMELL
+l	java:S125C"<This block of commented-out lines of code should be removed.(„ÂØùÿÿÿÿÿH¯#RMAJORZ
+CODE_SMELL
+g	java:S1254"<This block of commented-out lines of code should be removed.(½ÿ¹åH´#RMAJORZ
+CODE_SMELL
+`
+java:S1128"/Remove this unused import 'java.util.Optional'.(¨˜ëİüÿÿÿÿHµ#RMINORZ
+CODE_SMELL
+l	java:S125m"<This block of commented-out lines of code should be removed.(¢í¿ˆûÿÿÿÿH·#RMAJORZ
+CODE_SMELL
+˜
+java:S1488)"`Immediately return this expression instead of assigning it to the temporary variable "products".(ûìˆıÿÿÿÿ8×«’×–0HÌ%RMINORZ
+CODE_SMELL

@@ -1,0 +1,189 @@
+package com.leo.microservice.cartservice.serviceimpl;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import com.leo.microservice.cartservice.dto.CartDto;
+import com.leo.microservice.cartservice.dto.CartItemDto;
+import com.leo.microservice.cartservice.dto.ProductDto;
+import com.leo.microservice.cartservice.entity.Cart;
+import com.leo.microservice.cartservice.entity.CartItem;
+import com.leo.microservice.cartservice.mapper.CartItemMapper;
+import com.leo.microservice.cartservice.mapper.CartMapper;
+import com.leo.microservice.cartservice.service.CartService;
+import com.leo.microservice.cartservice.util.CartConverter;
+
+@Service
+public class CartServiceImpl implements CartService {
+
+//	@Autowired
+//	CartRepository cartRepository;
+//	
+//	@Autowired
+//	CartItemRepository cartItemRepository;
+	
+	@Autowired
+	CartConverter cartConverter;
+	
+	@Autowired
+	private CartMapper cartMapper;
+	
+	@Autowired
+	private CartItemMapper cartItemMapper;
+	
+	@Autowired
+	private RestTemplate restTemplate;
+	
+	@Override
+	public CartDto createCart() {
+		Cart cart = new Cart();
+		int num = cartMapper.insert(cart);
+		System.out.println("num value = " +num);
+		System.out.println("cart id = " +cart.getCartId());
+//		Cart cart = cartRepository.save(new Cart());
+//		CartDto cartDto = entityToDtoConverter(cart);
+//		return cartDto;
+		return null;
+	}
+
+
+	@Override
+	public CartDto getCartDto(Long cartId) {
+//		Optional<Cart> myCart = cartRepository.findById(id);
+
+//		if (myCart.isPresent()) {
+//			return entityToDtoConverter(myCart.get());
+//		}
+		Cart cart = getCart(cartId);
+		return entityToDtoConverter(cart);
+	}
+	
+	private Cart getCart(Long cartId) {
+		Cart cart = checkIfCartExists(cartId);
+		cart.getCartitems().addAll(getCartItems(cartId));
+		return cart;
+	}
+	
+	private List<CartItem> getCartItems(Long cartId){
+		return cartItemMapper.findCartItemsById(cartId);
+	}
+
+
+	@Override
+	public List<Cart> getCarts() {
+//		return cartRepository.findAll();
+		return cartMapper.findAll();
+	}
+	
+	@Override
+	public List<CartDto> getCartsDto(){
+//		List<CartDto> carts = getCarts().stream().map(this::entityToDtoConverter).toList();
+		List<Cart> carts = getCarts();
+		for (Cart cart : carts) {
+			cart.setCartitems(getCartItems(cart.getCartId()));
+		}
+		return carts.stream().map(this::entityToDtoConverter).toList();
+	}
+	
+
+	
+	@Override
+	public CartItemDto addCartItemToCart(Long cartId, Long productId, CartItemDto cartItemDto) {
+		CartDto cartDto = getCartDto(cartId);
+		ProductDto productDto = checkIfProductExists(productId);
+		checkForDuplicateProduct(cartId, productId);
+		CartItem cartItem = dtoToEntityConverterCartItem(cartItemDto);
+		
+		cartItem.setCartId(cartId);
+		cartItem.setProductId(productDto.getProductId());
+		cartItem.setProductPrice(productDto.getPrice());
+		cartItem.setCartItemTotalPrice(cartItem.getProductPrice()*cartItem.getQuantity());
+		cartItemMapper.insert(cartItem);
+		
+		updateCartTotalPrice(cartDto.getId());
+		
+		return entityToDtoConverterCartItem(cartItem);
+	}
+	
+	private Cart checkIfCartExists(Long cartId) {
+		Cart cart = cartMapper.findById(cartId);
+		if (cart == null) {
+			throw new RuntimeException("Cart Doesn't Exist");
+		}
+		return cart;
+	}
+	
+	private ProductDto checkIfProductExists(Long productId) {
+		ProductDto productDto = restTemplate.getForObject("http://localhost:8091/product/" +productId, ProductDto.class);
+		if (productDto == null) {
+			//create custom exception here
+			throw new RuntimeException("Product does not exist");
+		}
+		return productDto;
+	}
+	
+	private void checkForDuplicateProduct(Long cartId, Long productId) {
+		List<CartItem> cartItems = cartItemMapper.findCartItemsById(cartId);
+		cartItems.stream().forEach(item -> { if(item.getProductId().equals(productId)) throw new RuntimeException("Product already exist"); });
+	}
+	
+	
+	public Cart dtoToEntityConverter(CartDto cartDto) {
+		return cartConverter.dtoToEntity(cartDto);
+	}
+	
+	public CartDto entityToDtoConverter(Cart cart) {
+		return cartConverter.entityToDto(cart);
+	}
+	
+	public CartItem dtoToEntityConverterCartItem(CartItemDto cartItemDto) {
+		return cartConverter.dtoToEntityCartItem(cartItemDto);
+	}
+	
+	public CartItemDto entityToDtoConverterCartItem(CartItem cartItem) {
+		return cartConverter.entityToDtoCartItem(cartItem);
+	}
+
+
+	@Override
+	public CartDto deleteFromCart(Long cartId, Long productId) {
+		List<CartItem> cartItems = getCartItems(cartId).stream().toList();
+		CartItem cartItem = findCartItem(cartId, productId, cartItems);
+		deleteCartItem(cartItem);
+		updateCartTotalPrice(cartItem.getCartId());
+		return getCartDto(cartId);
+	}
+	
+	private void deleteCartItem(CartItem cartItem) {
+		cartItemMapper.deleteCartItem(cartItem);
+	}
+
+	private CartItem findCartItem(Long cartId, Long productId, List<CartItem> cartItems) {
+		CartItem cartItem = new CartItem();
+		for (CartItem item : cartItems) {
+			if(item.getCartId().equals(cartId) && item.getProductId().equals(productId)) {
+				cartItem = item;
+			}
+		}
+		return cartItem;
+	}
+	
+	private void updateCartTotalPrice(Long cartId) {
+		Cart cart = getCart(cartId);
+		List<CartItem> cartItems = getCartItems(cartId);
+		double total = 0;
+		for (CartItem cartItem : cartItems) {
+			total += cartItem.getCartItemTotalPrice();
+		}
+		cart.setTotalPrice(total);
+		cartMapper.updateCartTotal(cart);
+	}
+
+	
+
+}

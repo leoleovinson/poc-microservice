@@ -1,0 +1,5 @@
+package com.leo.microservice.cartservice.config;
+
+public class DBCreate {
+
+}

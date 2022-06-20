@@ -1,0 +1,29 @@
+
+v	java:S112t"FDefine and throw a dedicated exception instead of using a generic one.(Ùáí­ýÿÿÿÿHÖ!RMAJORZ
+CODE_SMELL
+q	java:S112}"FDefine and throw a dedicated exception instead of using a generic one.(ÃÒ°‹H×!RMAJORZ
+CODE_SMELL
+w	java:S112„"FDefine and throw a dedicated exception instead of using a generic one.(ÆÑ¦©ýÿÿÿÿHØ!RMAJORZ
+CODE_SMELL
+g	java:S125"<This block of commented-out lines of code should be removed.(»¢ÕÀHÙ!RMAJORZ
+CODE_SMELL
+b	java:S106."9Replace this use of System.out or System.err by a logger.(ž¦wHÛ!RMAJORZ
+CODE_SMELL
+i	java:S106/"9Replace this use of System.out or System.err by a logger.(€¯¦±ÿÿÿÿÿHÜ!RMAJORZ
+CODE_SMELL
+g	java:S1250"<This block of commented-out lines of code should be removed.(ô´ÌÕHÝ!RMAJORZ
+CODE_SMELL
+l	java:S1259"<This block of commented-out lines of code should be removed.(Ã¶Š§üÿÿÿÿHà!RMAJORZ
+CODE_SMELL
+g	java:S125;"<This block of commented-out lines of code should be removed.(“à£¢Há!RMAJORZ
+CODE_SMELL
+l	java:S125O"<This block of commented-out lines of code should be removed.(ÁÐÀêûÿÿÿÿHä!RMAJORZ
+CODE_SMELL
+g	java:S125U"<This block of commented-out lines of code should be removed.(®·°ÃHå!RMAJORZ
+CODE_SMELL
+[
+java:S1128"*Remove this unused import 'java.util.Set'.(ö²„¤þÿÿÿÿHæ!RMINORZ
+CODE_SMELL
+i
+java:S1128"8Remove this unused import 'java.util.stream.Collectors'.(Óóº´úÿÿÿÿHè!RMINORZ
+CODE_SMELL

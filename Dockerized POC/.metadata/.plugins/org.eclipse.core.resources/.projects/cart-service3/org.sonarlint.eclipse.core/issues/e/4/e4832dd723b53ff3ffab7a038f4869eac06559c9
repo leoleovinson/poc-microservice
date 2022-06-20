@@ -1,0 +1,32 @@
+
+g	java:S125<"<This block of commented-out lines of code should be removed.(—»ƒ÷Hî!RMAJORZ
+CODE_SMELL
+~
+java:S1128"MRemove this unused import 'com.leo.microservice.cartservice.entity.CartItem'.(àöÛûøÿÿÿÿHÿ!RMINORZ
+CODE_SMELL
+„
+java:S1128"SRemove this unused import 'com.leo.microservice.cartservice.mapper.CartItemMapper'.(Ã¯½ÃøÿÿÿÿH"RMINORZ
+CODE_SMELL
+\
+java:S1128"0Remove this unused import 'java.util.ArrayList'.(÷‰îƒHó!RMINORZ
+CODE_SMELL
+[
+java:S1128"*Remove this unused import 'java.util.Set'.(ö²„¤şÿÿÿÿH÷!RMINORZ
+CODE_SMELL
+
+java:S1128"SRemove this unused import 'org.springframework.web.bind.annotation.RequestMapping'.(ö»¿ëHù!RMINORZ
+CODE_SMELL
+z
+java:S1128"IRemove this unused import 'com.leo.microservice.cartservice.entity.Cart'.(‘ñõĞüÿÿÿÿHı!RMINORZ
+CODE_SMELL
+
+java:S1128"URemove this unused import 'com.leo.microservice.cartservice.service.CartItemService'.(¶ıö­Hƒ"RMINORZ
+CODE_SMELL
+f	java:S125@"<This block of commented-out lines of code should be removed.(††»IHñ!RMAJORZ
+CODE_SMELL
+x
+java:S1128"LRemove this unused import 'com.leo.microservice.cartservice.dto.ProductDto'.(‹ç‡ÛHû!RMINORZ
+CODE_SMELL
+Y
+java:S1128".Remove this unused import 'java.util.HashSet'.(Ê‚êXHõ!RMINORZ
+CODE_SMELL

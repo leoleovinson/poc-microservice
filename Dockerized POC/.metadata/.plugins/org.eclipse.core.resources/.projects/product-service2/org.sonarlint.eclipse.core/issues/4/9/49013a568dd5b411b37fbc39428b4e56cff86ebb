@@ -1,0 +1,26 @@
+
+g	java:S125E"<This block of commented-out lines of code should be removed.(ÂùøHêRMAJORZ
+CODE_SMELL
+l	java:S125M"<This block of commented-out lines of code should be removed.(²ã¦æøÿÿÿÿHïRMAJORZ
+CODE_SMELL
+j
+java:S1128"9Remove this unused import 'org.hibernate.SessionFactory'.(ñ¦«¬şÿÿÿÿHøRMINORZ
+CODE_SMELL
+„
+java:S1128"SRemove this unused import 'org.springframework.beans.factory.annotation.Autowired'.(¡¸ÎùÿÿÿÿHúRMINORZ
+CODE_SMELL
+w
+java:S1128"KRemove this unused import 'org.springframework.context.annotation.Primary'.(“ğ›ßHüRMINORZ
+CODE_SMELL
+‡
+java:S1128"[Remove this unused import 'org.springframework.orm.hibernate5.HibernateTransactionManager'.(˜ŸñªHşRMINORZ
+CODE_SMELL
+z
+java:S1128"IRemove this unused import 'org.springframework.orm.jpa.JpaVendorAdapter'.(İŸİøüÿÿÿÿH€ RMINORZ
+CODE_SMELL
+‹
+java:S1128"_Remove this unused import 'org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean'.(£õÕ–H‚ RMINORZ
+CODE_SMELL
+Š
+java:S1128"YRemove this unused import 'org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter'.(–…›¯şÿÿÿÿH„ RMINORZ
+CODE_SMELL
